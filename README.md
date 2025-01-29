@@ -59,6 +59,3 @@ g++ keylogger.cpp -o keylogger.exe -luser32 -lgdi32
 ```
 
 ---
-
-### Disclaimer:
-Use this code responsibly and only in environments where you have explicit permission. Unauthorized use of keyloggers is illegal in most jurisdictions.
